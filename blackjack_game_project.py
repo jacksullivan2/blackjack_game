@@ -3,12 +3,12 @@ from random import choice
 
 class BlackJack:
 	"""Model a player vs dealer (1 vs 1) BlackJack game"""
-	def __init__(self, player_name, money, current_pot=0.00):
+	def __init__(self, name, player_money, dealer_money, current_pot=0.00):
 		"""Initialise the game's attributes"""
 		self.player_name = name
-		self.dealer_balance = money 
-		self.player_balance = money
-		self.current_pot = 0.00
+		self.dealer_balance = dealer_money 
+		self.player_balance = player_money
+		self.current_pot = current_pot
 		self.last_hand_outcome = ""
 		
 		# Set each players intial hand to have a nominal value of 0
@@ -46,7 +46,7 @@ class BlackJack:
 			self.player_balance = self.player_balance - stake
 			self.dealer_balance = self.dealer_balance - stake
 
-		self.current_pot = stake*2
+		self.current_pot = self.current_pot + stake*2
 		print(f"\nCURRENT POT: £{self.current_pot}")
 
 
@@ -113,46 +113,51 @@ class BlackJack:
 		print(f"Dealer Balance: {self.dealer_balance}")
 
 
-	def reset(self):
+	def reset_or_continue_game(self):
 		"""Reset the nominal values of the hands and the current pot (as long as the last hand was won)"""
 		self.dealers_hand = 0
 		self.players_hand = 0
 		print("\nThe hands have been reset")
 		if self.last_hand_outcome == 'draw':
-			money = self.current_pot
+			self.current_pot = self.current_pot	
 		else:
 			self.current_pot = 0.0
 
+		play_on = input("Would you like to continue playing(y/n)? ")
+		if play_on == 'n':
+			exit()
+		elif play_on == 'y':
+			new_game = BlackJack(name, self.player_balance, self.dealer_balance, self.current_pot)
 
 
 
 
-
-
-# Introductory phase of the game 
-name = input("Please enter your username: ")
+# Introductory phase of the game
+name = input("Please enter your name: ")
 print(f"Welcome, {name.title()}")
-money = input("How much moeny would you like to deposit into your games account: £")
-money = float(money)
-if money < 0:
-	print("You can't withdraw money at this moment.")
+player_money = input("How much money would you like to deposit into your games account: £")
+player_money = float(player_money)
+if player_money < 0:
+	print("You can't enter a negative amount of money.")
 else:
-	print(f"£{money} has been deposited into your account.")
+	print(f"£{player_money} has been deposited into your account.")
+# Set the dealers money equal to the players money (at the beginning of the game) 
+dealer_money = player_money
 
-
-while True:
-	opening_question = input(f"\n{name}, would you like to play BlackJack vs the Dealer(y/n): ")
-	if opening_question == 'n':
-		break 
-	elif opening_question == 'y':
-		
-		game = BlackJack(name, money)
+opening_question = input(f"\n{name}, would you like to play BlackJack vs the Dealer(y/n): ")
+if opening_question == 'n':
+		exit() 
+elif opening_question == 'y':
+		game = BlackJack(name, player_money, dealer_money)
 		game.opening_message()
-		game.deal_players_inital_hand()
-		game.deal_dealers_initial_hand()
-		game.stake_and_fill_pot()
-		game.stick_twist()	
-		game.simulate_dealer_playing()
-		game.result()
-		game.new_balances()
-		game.reset()
+while True:
+	game.deal_players_inital_hand()
+	game.deal_dealers_initial_hand()
+	game.stake_and_fill_pot()
+	game.stick_twist()	
+	game.simulate_dealer_playing()
+	game.result()
+	game.new_balances()
+	game.reset_or_continue_game()
+
+
