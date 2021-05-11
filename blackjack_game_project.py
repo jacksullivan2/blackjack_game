@@ -20,7 +20,10 @@ class BlackJack:
 	def opening_message(self):
 		"""Display the dealer's welcome message to the players"""
 		print(f"Welcome to the game, {name.title()}. I am the dealer.\n" 
-		"I will equal the amount you place into the pot for each hand. Good Luck!\n")
+		"I will equal the amount you place into the pot for each hand.\n"
+		"\nRemember the rules:-\t Highest hand under or equal to 21 wins"
+		"-\tYour hand must be atleast 16 to win \n Good Luck!")
+
 
 	def deal_players_inital_hand(self):
 		"""Deal the player's initial hand"""
@@ -74,18 +77,40 @@ class BlackJack:
 
 	def simulate_dealer_playing(self):
 		"""Simulate the dealer playing the game in response to the Player's final hand"""
-		print("The dealer is now playing")
+		print("\nThe dealer is now playing")
 		while True:
-		
-			if (22 > self.dealers_hand >= 15) and (self.dealers_hand >= self.players_hand):
+			if self.players_hand > 21 and (21 >= self.dealers_hand >= 16):
 				print(f"\nThe dealer has stuck on: {self.dealers_hand}")
 				break
 
-			elif (self.dealers_hand < 14) or (self.dealers_hand < self.players_hand):
+			elif self.players_hand > 21 and self.dealers_hand < 16:
 				extra_card = self.cards.pop(random.randrange(len(self.cards)))
 				self.dealers_hand += extra_card
 				print(f"Dealers hand: {self.dealers_hand}")
 				continue
+		
+			elif (21 >= self.players_hand >= 16) and (self.dealers_hand < self.players_hand):
+				extra_card = self.cards.pop(random.randrange(len(self.cards)))
+				self.dealers_hand += extra_card
+				print(f"Dealers hand: {self.dealers_hand}")
+				continue
+
+			elif (21 >= self.players_hand >= 16) and (self.dealers_hand == self.players_hand):
+				if self.dealers_hand > 21:
+					print("THE DEALER HAS ALSO BUSTED")
+					break
+				else:
+					print(f"\nThe dealer has stuck on: {self.dealers_hand}")
+					break
+
+			elif (21 >= self.players_hand >= 16) and (self.dealers_hand > self.players_hand):
+				if self.dealers_hand > 21:
+					print("THE DEALER HAS BUSTED")
+					break
+				else:
+					print(f"\nThe dealer has stuck on: {self.dealers_hand}")
+					break
+
 			elif self.dealers_hand > 21:
 				print("\nTHE DEALER HAS BUSTED")
 				break
@@ -96,10 +121,12 @@ class BlackJack:
 		if (self.players_hand > self.dealers_hand) and (self.players_hand <= 21):
 			print("You have won this hand!!!")
 			self.player_balance += self.current_pot
+			self.last_hand_outcome = 'player win'
 		
 		elif (self.players_hand <= 21) and (self.dealers_hand > 21):
 			print("You have won this hand!!!")
 			self.player_balance += self.current_pot
+			self.last_hand_outcome = 'player win'
 
 		elif self.players_hand == self.dealers_hand or (self.players_hand > 21 and self.dealers_hand > 21):
 			print("This hand was a draw. The pot will roll over")
@@ -108,10 +135,12 @@ class BlackJack:
 		elif (self.players_hand < self.dealers_hand) and (self.dealers_hand <=21):
 			print("The dealer won this hand!")
 			self.dealer_balance += self.current_pot
+			self.last_hand_outcome = 'dealer win'
 
 		elif (self.dealers_hand <= 21) and (self.players_hand > 21):
 			print("The dealer won this hand.")
 			self.dealer_balance += self.current_pot
+			self.last_hand_outcome = 'dealer win'
 
 
 	def new_balances(self):
