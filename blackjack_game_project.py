@@ -9,6 +9,7 @@ class BlackJack:
 		self.dealer_balance = dealer_money 
 		self.player_balance = player_money
 		self.current_pot = current_pot
+		self.last_hand_outcome = ""
 		
 		# Set each players intial hand to have a nominal value of 0
 		self.dealers_hand = 0
