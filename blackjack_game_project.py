@@ -81,7 +81,8 @@ class BlackJack:
 				break
 
 			elif (self.dealers_hand < 14) or (self.dealers_hand < self.players_hand):
-				self.dealers_hand += choice(self.cards)
+				extra_card = self.cards.pop(random.randrange(len(self.cards)))
+				self.dealers_hand += extra_card
 				print(f"Dealers hand: {self.dealers_hand}")
 				continue
 			elif self.dealers_hand > 21:
