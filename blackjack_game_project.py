@@ -1,5 +1,5 @@
 # BLACKJACK GAME --- To be played in the terminal window ---
-from random import choice
+import random
 
 class BlackJack:
 	"""Model a player vs dealer (1 vs 1) BlackJack game"""
@@ -9,12 +9,12 @@ class BlackJack:
 		self.dealer_balance = dealer_money 
 		self.player_balance = player_money
 		self.current_pot = current_pot
-		self.last_hand_outcome = ""
 		
 		# Set each players intial hand to have a nominal value of 0
 		self.dealers_hand = 0
 		self.players_hand = 0
-		self.cards = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 11]
+		self.cards = [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 
+		8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11]
 
 	def opening_message(self):
 		"""Display the dealer's welcome message to the players"""
@@ -23,15 +23,17 @@ class BlackJack:
 
 	def deal_players_inital_hand(self):
 		"""Deal the player's initial hand"""
-		card1 = choice(self.cards)
-		card2 = choice(self.cards)
+		random.shuffle(self.cards)
+		card1 = self.cards.pop(random.randrange(len(self.cards)))
+		card2 = self.cards.pop(random.randrange(len(self.cards)))	
 		self.players_hand += (card1 + card2) 
 		print(f"Your hand: {self.players_hand}")
 
 	def deal_dealers_initial_hand(self):
 		"""Deal the dealers' initial hand"""
-		card3 = choice(self.cards)
-		card4 = choice(self.cards)
+		random.shuffle(self.cards)
+		card3 = self.cards.pop(random.randrange(len(self.cards)))
+		card4 = self.cards.pop(random.randrange(len(self.cards)))	
 		self.dealers_hand += (card3 + card4) 
 		print(f"Dealer's hand: {self.dealers_hand}")
 
@@ -48,6 +50,8 @@ class BlackJack:
 
 		self.current_pot = self.current_pot + stake*2
 		print(f"\nCURRENT POT: £{self.current_pot}")
+		print(f"\nPlayer Current Balance: {self.player_balance}")
+		print(f"Dealer Current Balance: {self.dealer_balance}")
 
 
 	def stick_twist(self):
@@ -58,7 +62,8 @@ class BlackJack:
 				twist = False
 				print(f"\nYou have stuck on {self.players_hand}")
 			elif decision == 'twist':
-				self.players_hand += choice(self.cards)
+				additional_card = self.cards.pop(random.randrange(len(self.cards)))
+				self.players_hand += additional_card
 				print(f"Current hand: {self.players_hand}")
 				if self.players_hand > 21:
 					print("BUST")
@@ -71,7 +76,7 @@ class BlackJack:
 		print("The dealer is now playing")
 		while True:
 		
-			if (22 > self.dealers_hand >= 15 ) and (self.dealers_hand >= self.players_hand):
+			if (22 > self.dealers_hand >= 15) and (self.dealers_hand >= self.players_hand):
 				print(f"\nThe dealer has stuck on: {self.dealers_hand}")
 				break
 
