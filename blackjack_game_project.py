@@ -24,10 +24,10 @@ class BlackJack:
 
 	def opening_message(self):
 		"""Display the dealer's welcome message to the players, and the rules of the game"""
-		print(f"Welcome to the game, {name.title()}. I am the dealer.\n" 
+		print(f"\nWelcome to the game, {name.title()}. I am the dealer.\n" 
 		"I will equal the amount you place into the pot for each hand.\n"
 		"\nRemember the rules:-\t Highest hand under or equal to 21 wins"
-		"-\tYour hand must be atleast 16 to win \n Good Luck!")
+		"-\tYour hand must be atleast 16 to win \n The first to bankrupt the opponent wins. \n Good luck!")
 
 
 	def deal_players_inital_hand(self):
@@ -39,7 +39,7 @@ class BlackJack:
 		# Handle for potential Ace in the first card 
 		if card1 == 'A':
 			print(f"\nYou have been delt: {card1} {card2}")
-			ace_choice = input("Would you like your first card as a 1 or 11?  ")
+			ace_choice = input("\nWould you like your first card as a 1 or 11?  ")
 			ace_choice1 = int(ace_choice)
 			if ace_choice1 == 1:
 				card1 = 1
@@ -58,7 +58,7 @@ class BlackJack:
 				self.player_card_two_ace = True
 
 		self.players_hand += (card1 + card2) 
-		print(f"\tYOUR HAND: {self.players_hand}")
+		print(f"\n\tYOUR HAND: {self.players_hand}")
 
 	
 	def deal_dealers_initial_hand(self):
@@ -87,7 +87,7 @@ class BlackJack:
 			card4 = 1
 
 		self.dealers_hand += (card3 + card4) 
-		print(f"\tDEALER'S HAND: {self.dealers_hand}")
+		print(f"\tDEALER'S HAND: {self.dealers_hand}\n")
 
 	def stake_and_fill_pot(self):
 		"""Ask how much the player would like to place into the pot for this hand. The dealer will match it. 
@@ -102,8 +102,8 @@ class BlackJack:
 
 		self.current_pot = self.current_pot + stake*2
 		print(f"\nCURRENT POT: £{self.current_pot}")
-		print(f"\nPlayer Current Balance: {self.player_balance}")
-		print(f"Dealer Current Balance: {self.dealer_balance}")
+		print(f"\n(Player Current Balance: £{self.player_balance})")
+		print(f"(Dealer Current Balance: £{self.dealer_balance})")
 
 
 	def stick_twist(self):
@@ -243,7 +243,7 @@ class BlackJack:
 		print(f"Dealer Balance: {self.dealer_balance}")
 
 
-	def reset_or_continue_game(self):
+	def reset_continue_or_finish_game(self):
 		"""Reset the nominal values of the hands and the current pot (as long as the last hand was won)"""
 		self.dealers_hand = 0
 		self.players_hand = 0
@@ -252,6 +252,13 @@ class BlackJack:
 			self.current_pot = self.current_pot	
 		else:
 			self.current_pot = 0.0
+		# Finish the game if either player has to go into a negative balance to play the next hand.	
+		if self.player_balance <= 1.99:
+			print("---THE DEALER HAS WON THE GAME---")
+			exit()
+		if self.dealer_balance <= 1.99:
+			print("---YOU HAVE WON THE GAME---")
+			exit()
 
 		play_on = input("Would you like to continue playing(y/n)? ")
 		if play_on == 'n':
@@ -265,7 +272,7 @@ class BlackJack:
 # Introductory phase of the game
 name = input("Please enter your name: ")
 print(f"Welcome, {name.title()}")
-player_money = input("How much money would you like to deposit into your games account: £")
+player_money = input("\nHow much money would you like to deposit into your games account: £")
 player_money = float(player_money)
 if player_money < 0:
 	print("You can't enter a negative amount of money.")
@@ -288,5 +295,5 @@ while True:
 	game.simulate_dealer_playing()
 	game.result()
 	game.new_balances()
-	game.reset_or_continue_game()
+	game.reset_continue_or_finish_game()
 
