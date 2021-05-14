@@ -10,6 +10,10 @@ class BlackJack:
 		self.player_balance = player_money
 		self.current_pot = current_pot
 		self.last_hand_outcome = ""
+		self.player_card_one_ace = False
+		self.player_card_two_ace = False
+		self.dealer_card_one_ace = False
+		self.dealer_card_two_ace = False
 		
 		# Set each players intial hand to have a nominal value of 0
 		self.dealers_hand = 0
@@ -19,7 +23,7 @@ class BlackJack:
 		'A', 'A', 'A', 'A']
 
 	def opening_message(self):
-		"""Display the dealer's welcome message to the players"""
+		"""Display the dealer's welcome message to the players, and the rules of the game"""
 		print(f"Welcome to the game, {name.title()}. I am the dealer.\n" 
 		"I will equal the amount you place into the pot for each hand.\n"
 		"\nRemember the rules:-\t Highest hand under or equal to 21 wins"
@@ -31,6 +35,8 @@ class BlackJack:
 		random.shuffle(self.cards)
 		card1 = self.cards.pop(random.randrange(len(self.cards)))
 		card2 = self.cards.pop(random.randrange(len(self.cards)))	
+		
+		# Handle for potential Ace in the first card 
 		if card1 == 'A':
 			print(f"\nYou have been delt: {card1} {card2}")
 			ace_choice = input("Would you like your first card as a 1 or 11?  ")
@@ -39,7 +45,8 @@ class BlackJack:
 				card1 = 1
 			elif ace_choice1 == 11:
 				card1 = 11
-
+				self.player_card_one_ace = True
+		# Handle for potential Ace in the second card		
 		if card2 == 'A':
 			print(f"\nYou have been delt: {card1} {card2}")
 			ace_choice2 = input("Would you like your second card as a 1 or 11? ")
@@ -48,28 +55,39 @@ class BlackJack:
 				card2 = 1
 			elif ace_choice2 == 11:
 				card2 = 11
+				self.player_card_two_ace = True
 
 		self.players_hand += (card1 + card2) 
-		print(f"Your hand: {self.players_hand}")
+		print(f"\tYOUR HAND: {self.players_hand}")
 
+	
 	def deal_dealers_initial_hand(self):
-		"""Deal the dealers' initial hand"""
+		"""Deal the dealers' initial hand, and define the dealer's strategy"""
 		random.shuffle(self.cards)
 		card3 = self.cards.pop(random.randrange(len(self.cards)))
 		card4 = self.cards.pop(random.randrange(len(self.cards)))
+		# The dealer will interpret their first card as an ace if it gives them a hand of 16-21
 		if card3 == 'A' and (5 <= card4 <= 10):
 			card3 = 11
+			self.dealer_card_one_ace = True
+
+		# The dealer will opt for a 12 in the scenario when she is delt two Ace's	
 		elif card3 == 'A' and card4 == 'A':
 			card3, card4 = 11, 1
+			self.dealer_card_one_ace = True
+		# The dealer will choose their Ace to be a one if their other card is a low value.	
 		elif card3 == 'A' and (4 >= card4):
 			card3 = 1
+		# The next two elif block introduces the same logic but factors for the dealer being given an Ace 
+		# for her second card.	
 		elif card4 == 'A' and (5 <= card3 <= 10):
 			card4 = 11
+			self.dealer_card_two_ace = True
 		elif card4 == 'A' and (4 >= card3):
 			card4 = 1
 
 		self.dealers_hand += (card3 + card4) 
-		print(f"Dealer's hand: {self.dealers_hand}")
+		print(f"\tDEALER'S HAND: {self.dealers_hand}")
 
 	def stake_and_fill_pot(self):
 		"""Ask how much the player would like to place into the pot for this hand. The dealer will match it. 
@@ -102,11 +120,23 @@ class BlackJack:
 				self.players_hand += additional_card
 				print(f"Current hand: {self.players_hand}")
 				if self.players_hand > 21:
-					print("BUST")
-					break
-				else:
-					continue
+					
+					if self.player_card_one_ace:
+						self.players_hand = self.players_hand - 10
+						print(f"You adjusted your Ace (11) to Ace (1). Your new hand: {self.players_hand}")
+						self.player_card_one_ace = False
+						continue
+					
+					elif self.player_card_two_ace:
+						self.players_hand = self.players_hand - 10
+						print(f"\nYou adjusted your Ace (11) to Ace (1). Your new hand: {self.players_hand}")
+						self.player_card_two_ace = False
+						continue
 
+					else:
+						print("---BUST---")
+						break
+	
 	def simulate_dealer_playing(self):
 		"""Simulate the dealer playing the game in response to the Player's final hand"""
 		print("\nThe dealer is now playing")
@@ -132,24 +162,52 @@ class BlackJack:
 				continue
 
 			elif (21 >= self.players_hand >= 16) and (self.dealers_hand == self.players_hand):
-				if self.dealers_hand > 21:
-					print("THE DEALER HAS ALSO BUSTED")
-					break
-				else:
-					print(f"\nThe dealer has stuck on: {self.dealers_hand}")
-					break
+				print(f"\nThe dealer has stuck on: {self.dealers_hand}")
+				break
 
 			elif (21 >= self.players_hand >= 16) and (self.dealers_hand > self.players_hand):
 				if self.dealers_hand > 21:
-					print("THE DEALER HAS BUSTED")
-					break
+					if self.dealer_card_one_ace:
+						self.dealers_hand = self.dealers_hand - 10 
+						print("The dealer has adjusted her Ace from an 11 to a 1. Dealer now playing: " 
+							f"{self.dealers_hand}")
+						self.dealer_card_one_ace = False
+						if self.dealers_hand <= 21:
+							continue 
+
+					elif self.dealer_card_two_ace:
+						self.dealers_hand = self.dealers_hand - 10
+						print("The dealer has adjusted her Ace from an 11 to a 1. Dealer now playing: " 
+							f"{self.dealers_hand}")
+						self.dealer_card_two_ace = False
+						if self.dealers_hand <= 21:
+							continue
+					else:
+						print("THE DEALER HAS BUSTED")
+						break
 				else:
 					print(f"\nThe dealer has stuck on: {self.dealers_hand}")
 					break
 
+			
 			elif self.dealers_hand > 21:
-				print("\nTHE DEALER HAS BUSTED")
-				break
+				if self.dealer_card_one_ace:
+					self.dealers_hand = self.dealers_hand - 10 
+					print("The dealer has adjusted her Ace from an 11 to a 1. Dealer now playing: " 
+						f"{self.dealers_hand}") 
+					self.dealer_card_one_ace = False
+					if self.dealers_hand <= 21:
+							continue
+				elif self.dealer_card_two_ace:
+						self.dealers_hand = self.dealers_hand - 10
+						print("The dealer has adjusted her Ace from an 11 to a 1. Dealer now playing: " 
+							f"{self.dealers_hand}")
+						self.dealer_card_two_ace = False
+						if self.dealers_hand <= 21:
+							continue
+				else: 
+					print("\nTHE DEALER HAS BUSTED")
+					break
 
 
 	def result(self):
