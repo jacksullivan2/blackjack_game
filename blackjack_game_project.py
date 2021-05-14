@@ -15,7 +15,8 @@ class BlackJack:
 		self.dealers_hand = 0
 		self.players_hand = 0
 		self.cards = [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 
-		8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11]
+		8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+		'A', 'A', 'A', 'A']
 
 	def opening_message(self):
 		"""Display the dealer's welcome message to the players"""
@@ -30,6 +31,24 @@ class BlackJack:
 		random.shuffle(self.cards)
 		card1 = self.cards.pop(random.randrange(len(self.cards)))
 		card2 = self.cards.pop(random.randrange(len(self.cards)))	
+		if card1 == 'A':
+			print(f"\nYou have been delt: {card1} {card2}")
+			ace_choice = input("Would you like your first card as a 1 or 11?  ")
+			ace_choice1 = int(ace_choice)
+			if ace_choice1 == 1:
+				card1 = 1
+			elif ace_choice1 == 11:
+				card1 = 11
+
+		if card2 == 'A':
+			print(f"\nYou have been delt: {card1} {card2}")
+			ace_choice2 = input("Would you like your second card as a 1 or 11? ")
+			ace_choice2 = int(ace_choice2)
+			if ace_choice2 == 1:
+				card2 = 1
+			elif ace_choice2 == 11:
+				card2 = 11
+
 		self.players_hand += (card1 + card2) 
 		print(f"Your hand: {self.players_hand}")
 
@@ -37,7 +56,18 @@ class BlackJack:
 		"""Deal the dealers' initial hand"""
 		random.shuffle(self.cards)
 		card3 = self.cards.pop(random.randrange(len(self.cards)))
-		card4 = self.cards.pop(random.randrange(len(self.cards)))	
+		card4 = self.cards.pop(random.randrange(len(self.cards)))
+		if card3 == 'A' and (5 <= card4 <= 10):
+			card3 = 11
+		elif card3 == 'A' and card4 == 'A':
+			card3, card4 = 11, 1
+		elif card3 == 'A' and (4 >= card4):
+			card3 = 1
+		elif card4 == 'A' and (5 <= card3 <= 10):
+			card4 = 11
+		elif card4 == 'A' and (4 >= card3):
+			card4 = 1
+
 		self.dealers_hand += (card3 + card4) 
 		print(f"Dealer's hand: {self.dealers_hand}")
 
@@ -67,6 +97,8 @@ class BlackJack:
 				print(f"\nYou have stuck on {self.players_hand}")
 			elif decision == 'twist':
 				additional_card = self.cards.pop(random.randrange(len(self.cards)))
+				if additional_card == 'A':
+					additional_card = 1
 				self.players_hand += additional_card
 				print(f"Current hand: {self.players_hand}")
 				if self.players_hand > 21:
@@ -85,12 +117,16 @@ class BlackJack:
 
 			elif self.players_hand > 21 and self.dealers_hand < 16:
 				extra_card = self.cards.pop(random.randrange(len(self.cards)))
+				if extra_card == 'A':
+					extra_card = 1
 				self.dealers_hand += extra_card
 				print(f"Dealers hand: {self.dealers_hand}")
 				continue
 		
 			elif (21 >= self.players_hand >= 16) and (self.dealers_hand < self.players_hand):
 				extra_card = self.cards.pop(random.randrange(len(self.cards)))
+				if extra_card == 'A':
+					extra_card = 1
 				self.dealers_hand += extra_card
 				print(f"Dealers hand: {self.dealers_hand}")
 				continue
@@ -195,5 +231,4 @@ while True:
 	game.result()
 	game.new_balances()
 	game.reset_or_continue_game()
-
 
