@@ -109,7 +109,7 @@ class BlackJack:
 	def stick_twist(self):
 		twist = True
 		while twist:
-			decision = input("Would you like to stick or twist?: ")
+			decision = input("\nWould you like to stick or twist?: ")
 			if decision == 'stick':
 				twist = False
 				print(f"\nYou have stuck on {self.players_hand}")
@@ -273,11 +273,20 @@ class BlackJack:
 name = input("Please enter your name: ")
 print(f"Welcome, {name.title()}")
 player_money = input("\nHow much money would you like to deposit into your games account: £")
-player_money = float(player_money)
+
+try:
+	player_money = float(player_money)
+except ValueError:
+	print("You need to enter a numerical value when depositing into your games account")
+	player_money = input("\nHow much money would you like to deposit into your games account: £")
+	player_money = float(player_money)
+
 if player_money < 0:
 	print("You can't enter a negative amount of money.")
-else:
-	print(f"£{player_money} has been deposited into your account.")
+	player_money = input("How much would you like to deposit into your account: £")
+	player_money = float(player_money)
+
+print(f"£{player_money} has been deposited into your account.")
 # Set the dealers money equal to the players money (at the beginning of the game) 
 dealer_money = player_money
 
