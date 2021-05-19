@@ -1,5 +1,12 @@
 # BLACKJACK GAME --- To be played in the terminal window ---
 import random
+import mysql.connector
+
+db = mysql.connector.connect(
+	host='localhost',
+	user='root',
+	password='TigerWoods06!',
+	database='blackjack')
 
 class BlackJack:
 	"""Model a player vs dealer (1 vs 1) BlackJack game"""
@@ -89,6 +96,7 @@ class BlackJack:
 		self.dealers_hand += (card3 + card4) 
 		print(f"\tDEALER'S HAND: {self.dealers_hand}\n")
 
+
 	def stake_and_fill_pot(self):
 		"""Ask how much the player would like to place into the pot for this hand. The dealer will match it. 
 			Temporarily remove the the stake from the player and dealer's balance. Fill the pot"""
@@ -137,6 +145,7 @@ class BlackJack:
 						print("---BUST---")
 						break
 	
+
 	def simulate_dealer_playing(self):
 		"""Simulate the dealer playing the game in response to the Player's final hand"""
 		print("\nThe dealer is now playing")
@@ -242,6 +251,14 @@ class BlackJack:
 		print(f"\nPlayer Balance: {self.player_balance}")
 		print(f"Dealer Balance: {self.dealer_balance}")
 
+	def database_store(self):
+		"""Store the result of the last hand into a database in my MySQL server"""
+		my_cursor = db.cursor()
+		query = "INSERT INTO games (player_name, hand_result, current_pot, player_hand, dealer_hand)"
+		query += "VALUES (%s, %s, %s, %s, %s)"
+		data = (self.player_name, self.last_hand_outcome, self.current_pot, self.players_hand, self.dealers_hand)
+		my_cursor.execute(query, data)
+		db.commit() 
 
 	def reset_continue_or_finish_game(self):
 		"""Reset the nominal values of the hands and the current pot (as long as the last hand was won)"""
@@ -268,8 +285,7 @@ class BlackJack:
 
 
 
-
-# Introductory phase of the game
+##  Introductory phase of the game ## 
 name = input("Please enter your name: ")
 print(f"Welcome, {name.title()}")
 player_money = input("\nHow much money would you like to deposit into your games account: £")
@@ -304,5 +320,6 @@ while True:
 	game.simulate_dealer_playing()
 	game.result()
 	game.new_balances()
+	game.database_store()
 	game.reset_continue_or_finish_game()
 
