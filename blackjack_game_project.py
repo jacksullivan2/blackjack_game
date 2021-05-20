@@ -1,11 +1,12 @@
 # BLACKJACK GAME --- To be played in the terminal window ---
 import random
 import mysql.connector
+import jack_passwords
 
 db = mysql.connector.connect(
 	host='localhost',
 	user='root',
-	password='TigerWoods06!',
+	password=jack_passwords.mysql_server_password(),
 	database='blackjack')
 
 class BlackJack:
