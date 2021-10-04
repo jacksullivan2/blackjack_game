@@ -11,11 +11,12 @@ db = mysql.connector.connect(
 
 class BlackJack:
 	"""Model a player vs dealer (1 vs 1) BlackJack game"""
+	
 	def __init__(self, name, player_money, dealer_money, current_pot=0.00):
-		"""Initialise the game's attributes"""
+		"""Initialise the Blackjack game's attributes"""
 		self.player_name = name
-		self.dealer_balance = dealer_money 
 		self.player_balance = player_money
+		self.dealer_balance = dealer_money 
 		self.current_pot = current_pot
 		self.last_hand_outcome = ""
 		self.player_card_one_ace = False
@@ -26,26 +27,33 @@ class BlackJack:
 		# Set each players intial hand to have a nominal value of 0
 		self.dealers_hand = 0
 		self.players_hand = 0
+		# Create list attributes containing each of the cards for each player. This will allow each player to change an ace from their third card onwards.
+		self.dealers_list = []
+		self.players_list = []
 		self.cards = [2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 
 		8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 		'A', 'A', 'A', 'A']
 
 	def opening_message(self):
 		"""Display the dealer's welcome message to the players, and the rules of the game"""
-		print(f"\nWelcome to the game, {name.title()}. I am the dealer.\n" 
+		print(f"\n\nWelcome to the game, {name.title()}. I am the dealer.\n" 
 		"I will equal the amount you place into the pot for each hand.\n"
-		"\nRemember the rules:-\t Highest hand under or equal to 21 wins"
-		"-\tYour hand must be atleast 16 to win \n The first to bankrupt the opponent wins. \n Good luck!")
+		"\nRemember the rules:\t -Highest hand under or equal to 21 wins"
+		"-\tYour hand must be at least 16 to win \n The first to bankrupt the opponent wins. \n Good luck!")
 
 
 	def deal_players_inital_hand(self):
 		"""Deal the player's initial hand"""
 		random.shuffle(self.cards)
 		card1 = self.cards.pop(random.randrange(len(self.cards)))
-		card2 = self.cards.pop(random.randrange(len(self.cards)))	
+		card2 = self.cards.pop(random.randrange(len(self.cards)))
+		# Add these cards to the player's list of cards:
+		self.players_list.append(card1)
+		self.players_list.append(card2)	
+
 		
-		# Handle for potential Ace in the first card 
-		if card1 == 'A':
+		# Handle for a potential Ace in the first card 
+		if card1 == 'A':		
 			print(f"\nYou have been delt: {card1} {card2}")
 			ace_choice = input("\nWould you like your first card as a 1 or 11?  ")
 			ace_choice1 = int(ace_choice)
@@ -70,20 +78,24 @@ class BlackJack:
 
 	
 	def deal_dealers_initial_hand(self):
-		"""Deal the dealers' initial hand, and define the dealer's strategy"""
+		"""Deal the dealers' initial hand, and define the dealer's strategy if delt an Ace"""
 		random.shuffle(self.cards)
 		card3 = self.cards.pop(random.randrange(len(self.cards)))
 		card4 = self.cards.pop(random.randrange(len(self.cards)))
+		# Add these cards to the dealer's list of cards:
+		self.dealers_list.append(card3)
+		self.dealers_list.append(card4)
+
+		# Define the dealer's logic	
 		# The dealer will interpret their first card as an ace if it gives them a hand of 16-21
 		if card3 == 'A' and (5 <= card4 <= 10):
 			card3 = 11
 			self.dealer_card_one_ace = True
-
 		# The dealer will opt for a 12 in the scenario when she is delt two Ace's	
 		elif card3 == 'A' and card4 == 'A':
 			card3, card4 = 11, 1
-			self.dealer_card_one_ace = True
-		# The dealer will choose their Ace to be a one if their other card is a low value.	
+			self.dealer_card_one_ace = True	
+		# The dealer will choose their Ace to be a 1 if their other card is a low value.	
 		elif card3 == 'A' and (4 >= card4):
 			card3 = 1
 		# The next two elif block introduces the same logic but factors for the dealer being given an Ace 
@@ -100,22 +112,32 @@ class BlackJack:
 
 	def stake_and_fill_pot(self):
 		"""Ask how much the player would like to place into the pot for this hand. The dealer will match it. 
-			Temporarily remove the the stake from the player and dealer's balance. Fill the pot"""
-		stake = input("Place an amount into the pot (minimum £2): £ ")
-		stake = float(stake)
-		if stake < 2:
-			print("You need to place more into the pot")	
-		else:
-			self.player_balance = self.player_balance - stake
-			self.dealer_balance = self.dealer_balance - stake
+		   Temporarily remove the stake from the player and dealer's balance. Fill the pot"""
+		twist = True
+		while twist:
+			stake = input("Place an amount into the pot (minimum £2): £ ")
+			try:
+				stake = float(stake)
+			except ValueError:
+				print("\nPlease enter a numerical value")
+				continue 
+			if stake < 2:
+				print("You need to place at least £2 into the pot")
+				continue	
+			else:
+				break
 
-		self.current_pot = self.current_pot + stake*2
+		self.player_balance -= stake
+		self.dealer_balance -= stake
+
+		self.current_pot += stake*2
 		print(f"\nCURRENT POT: £{self.current_pot}")
 		print(f"\n(Player Current Balance: £{self.player_balance})")
 		print(f"(Dealer Current Balance: £{self.dealer_balance})")
 
 
 	def stick_twist(self):
+		"""Simulate the stick/twist decision making for the player"""
 		twist = True
 		while twist:
 			decision = input("\nWould you like to stick or twist?: ")
@@ -124,31 +146,46 @@ class BlackJack:
 				print(f"\nYou have stuck on {self.players_hand}")
 			elif decision == 'twist':
 				additional_card = self.cards.pop(random.randrange(len(self.cards)))
+				# Add this card to the player's list of cards 
+				self.players_list.append(additional_card)
+				# Give the player a choice if delt an Ace how to interpret it.
 				if additional_card == 'A':
-					additional_card = 1
+					additional_ace_choice = input(f"\nYou have been delt an {additional_card}.\n You currently have a hand of {self.players_hand}, would you like to accept this ace as a 1 or an 11: ")
+					additional_ace_choice = int(additional_ace_choice)
+					if additional_ace_choice == 1:
+						additional_card = 1
+					elif additional_ace_choice == 11 and ((self.players_hand + 11) > 21):
+						print(f"\nIf you choose that Ace as an 11 you will go bust! Take it as a 1 to keep yourself in the hand")
+						additional_card = 1
+					elif additional_ace_choice == 11:
+						additional_card = 11
+
+
+				
+				# Add the value of the new card to the players hand 	
 				self.players_hand += additional_card
+				# Print the value of the players current hand
 				print(f"Current hand: {self.players_hand}")
+				# Allow the player to adjust an Ace in their initial hand if they bust:
 				if self.players_hand > 21:
-					
 					if self.player_card_one_ace:
 						self.players_hand = self.players_hand - 10
-						print(f"You adjusted your Ace (11) to Ace (1). Your new hand: {self.players_hand}")
+						print(f"You adjusted an Ace (11) to Ace (1). Your new hand: {self.players_hand}")
 						self.player_card_one_ace = False
 						continue
-					
 					elif self.player_card_two_ace:
 						self.players_hand = self.players_hand - 10
 						print(f"\nYou adjusted your Ace (11) to Ace (1). Your new hand: {self.players_hand}")
 						self.player_card_two_ace = False
 						continue
-
 					else:
 						print("---BUST---")
 						break
+
 	
 
 	def simulate_dealer_playing(self):
-		"""Simulate the dealer playing the game in response to the Player's final hand"""
+		"""Simulate the dealer playing the game in response to the player's final hand"""
 		print("\nThe dealer is now playing")
 		while True:
 			if self.players_hand > 21 and (21 >= self.dealers_hand >= 16):
@@ -157,15 +194,21 @@ class BlackJack:
 
 			elif self.players_hand > 21 and self.dealers_hand < 16:
 				extra_card = self.cards.pop(random.randrange(len(self.cards)))
-				if extra_card == 'A':
+				# Code for a potential Ace
+				if extra_card == 'A' and (self.dealers_hand <= 10):
+					extra_card = 11
+				elif extra_card == 'A' and (self.dealers_hand + 11 > 21):
 					extra_card = 1
+
 				self.dealers_hand += extra_card
 				print(f"Dealers hand: {self.dealers_hand}")
 				continue
 		
 			elif (21 >= self.players_hand >= 16) and (self.dealers_hand < self.players_hand):
 				extra_card = self.cards.pop(random.randrange(len(self.cards)))
-				if extra_card == 'A':
+				if extra_card == 'A' and self.dealers_hand <= 10:
+					extra_card = 11
+				elif extra_card == 'A' and self.dealers_hand > 10:
 					extra_card = 1
 				self.dealers_hand += extra_card
 				print(f"Dealers hand: {self.dealers_hand}")
@@ -179,19 +222,16 @@ class BlackJack:
 				if self.dealers_hand > 21:
 					if self.dealer_card_one_ace:
 						self.dealers_hand = self.dealers_hand - 10 
-						print("The dealer has adjusted her Ace from an 11 to a 1. Dealer now playing: " 
+						print("The dealer has adjusted an Ace from an 11 to a 1. Dealer now playing: " 
 							f"{self.dealers_hand}")
 						self.dealer_card_one_ace = False
-						if self.dealers_hand <= 21:
-							continue 
-
+						continue 
 					elif self.dealer_card_two_ace:
 						self.dealers_hand = self.dealers_hand - 10
-						print("The dealer has adjusted her Ace from an 11 to a 1. Dealer now playing: " 
+						print("The dealer has adjusted an Ace from an 11 to a 1. Dealer now playing: " 
 							f"{self.dealers_hand}")
 						self.dealer_card_two_ace = False
-						if self.dealers_hand <= 21:
-							continue
+						continue
 					else:
 						print("THE DEALER HAS BUSTED")
 						break
